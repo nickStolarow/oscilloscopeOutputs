@@ -19,6 +19,7 @@ __status__ = "Production"
 # Imports
 ################################################################################
 import argparse
+import math
 
 ################################################################################
 # Functions
@@ -56,6 +57,7 @@ def peak_to_peak(values:list) -> float:
 
 def phase_difference(time:list, values:list) -> float:
     positive_first = None
+    avg = 0.0
 
     if values[0] > 0:
         positive_first = True
@@ -79,6 +81,18 @@ def phase_difference(time:list, values:list) -> float:
 
     return avg
 
+
+def rms(values:list) -> float:
+    sum_squared_values = 0.0
+    
+    for v in values:
+        sum_squared_values += math.pow(v,2)
+    
+    mean = sum_squared_values / len(values)
+
+    return math.sqrt(mean)
+        
+
 ################################################################################
 # Run
 ################################################################################
@@ -98,3 +112,5 @@ if __name__ == '__main__':
     else:
         print(f'Phase Difference Between Current and Voltage: {current_avg_time - voltage_avg_time}')
 
+    print(f'Voltage RMS: {rms(voltage)}')
+    print(f'Current RMS: {rms(current)}')
