@@ -3,7 +3,7 @@
 """
 This program takes in a file with columns; time, voltage, and current. It then
 parses all of the columns into their own array and performs several calculations
-and then prints the results of those calculations.
+before printing the results of those calculations to the terminal.
 """
 
 __author__ = "Nick Stolarow"
