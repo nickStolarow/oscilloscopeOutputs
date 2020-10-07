@@ -21,17 +21,18 @@ __status__ = "Production"
 import argparse
 import math
 
+
 ################################################################################
 # Functions
 ################################################################################
-def argument_parser() -> list:
+def argument_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument('Filepath', help='The files location on the machine')
 
     return parser.parse_args()
 
 
-def parse_file(filepath:str) -> tuple:
+def parse_file(filepath: str) -> tuple:
     time = []
     voltage = []
     current = []
@@ -48,14 +49,14 @@ def parse_file(filepath:str) -> tuple:
                 voltage.append(float(values.pop()))
                 time.append(float(values.pop()))
 
-    return (time, voltage, current)
+    return time, voltage, current
 
 
-def peak_to_peak(values:list) -> float:
+def peak_to_peak(values: list) -> float:
     return max(values) - min(values)
 
 
-def phase_difference(time:list, values:list) -> float:
+def phase_difference(time: list, values: list) -> float:
     positive_first = None
     avg = 0.0
 
@@ -82,16 +83,16 @@ def phase_difference(time:list, values:list) -> float:
     return avg
 
 
-def rms(values:list) -> float:
+def rms(values: list) -> float:
     sum_squared_values = 0.0
-    
+
     for v in values:
-        sum_squared_values += math.pow(v,2)
-    
+        sum_squared_values += math.pow(v, 2)
+
     mean = sum_squared_values / len(values)
 
     return math.sqrt(mean)
-        
+
 
 ################################################################################
 # Run
