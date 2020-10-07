@@ -56,27 +56,60 @@ def peak_to_peak(values: list) -> float:
     return max(values) - min(values)
 
 
-def phase_difference(time: list, values: list) -> float:
+def phase_difference_voltage(time: list, voltage: list) -> tuple:
     positive_first = None
     avg = 0.0
+    sign_change_index = -1
 
-    if values[0] > 0:
+    if voltage[0] > 0:
         positive_first = True
     else:
         positive_first = False
 
-    for v in values:
+    for v in voltage:
 
         if positive_first:
             if v < 0:
-                t1 = values.index(v) - 1
-                t2 = values.index(v)
+                sign_change_index = voltage.index(v)
+                t1 = sign_change_index - 1
+                t2 = sign_change_index
                 avg = (time[t1] + time[t2]) / 2
                 break
         else:
             if v > 0:
-                t1 = values.index(v) - 1
-                t2 = values.index(v)
+                sign_change_index = voltage.index(v)
+                t1 = sign_change_index - 1
+                t2 = sign_change_index
+                avg = (time[t1] + time[t2]) / 2
+                break
+
+    return avg, sign_change_index
+
+
+def phase_difference_current(time: list, current: list, start_index: int) -> float:
+    positive_first = None
+    avg = 0.0
+    sign_change_index = -1
+
+    if current[start_index] > 0:
+        positive_first = True
+    else:
+        positive_first = False
+
+    for c in current[start_index:]:
+
+        if positive_first:
+            if c < 0:
+                sign_change_index = current.index(c)
+                t1 = sign_change_index - 1
+                t2 = sign_change_index
+                avg = (time[t1] + time[t2]) / 2
+                break
+        else:
+            if c > 0:
+                sign_change_index = current.index(c)
+                t1 = sign_change_index - 1
+                t2 = sign_change_index
                 avg = (time[t1] + time[t2]) / 2
                 break
 
@@ -103,8 +136,8 @@ if __name__ == '__main__':
     time, voltage, current = parse_file(filepath)
     print(f'Voltage Peak to Peak: {peak_to_peak(voltage)}V')
     print(f'Current Peak to Peak: {peak_to_peak(current)}I')
-    voltage_avg_time = phase_difference(time, voltage)
-    current_avg_time = phase_difference(time, current)
+    voltage_avg_time, start_index = phase_difference_voltage(time, voltage)
+    current_avg_time = phase_difference_current(time, current, start_index)
     print(f'When Voltage Crosses Zero: {voltage_avg_time}')
     print(f'When Current Crosses Zero: {current_avg_time}')
 
