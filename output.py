@@ -56,7 +56,7 @@ def peak_to_peak(values: list) -> float:
     return max(values) - min(values)
 
 
-def phase_difference_voltage(time: list, voltage: list) -> tuple:
+def voltage_zero_crossing(time: list, voltage: list) -> tuple:
     positive_first = None
     avg = 0.0
     sign_change_index = -1
@@ -86,7 +86,7 @@ def phase_difference_voltage(time: list, voltage: list) -> tuple:
     return avg, sign_change_index
 
 
-def phase_difference_current(time: list, current: list, start_index: int) -> float:
+def current_zero_crossing(time: list, current: list, start_index: int) -> float:
     positive_first = None
     avg = 0.0
     sign_change_index = -1
@@ -136,15 +136,15 @@ if __name__ == '__main__':
     time, voltage, current = parse_file(filepath)
     print(f'Voltage Peak to Peak: {peak_to_peak(voltage)}V')
     print(f'Current Peak to Peak: {peak_to_peak(current)}I')
-    voltage_avg_time, start_index = phase_difference_voltage(time, voltage)
-    current_avg_time = phase_difference_current(time, current, start_index)
-    print(f'When Voltage Crosses Zero: {voltage_avg_time}')
-    print(f'When Current Crosses Zero: {current_avg_time}')
+    v_zero_crossing, start_index = voltage_zero_crossing(time, voltage)
+    c_zero_crossing = current_zero_crossing(time, current, start_index)
+    print(f'When Voltage Crosses Zero: {v_zero_crossing}')
+    print(f'When Current Crosses Zero: {c_zero_crossing}')
 
-    if voltage_avg_time > current_avg_time:
-        print(f'Phase Difference Between Voltage and Current: {voltage_avg_time - current_avg_time}')
+    if v_zero_crossing > c_zero_crossing:
+        print(f'Phase Difference Between Voltage and Current: {v_zero_crossing - c_zero_crossing}')
     else:
-        print(f'Phase Difference Between Current and Voltage: {current_avg_time - voltage_avg_time}')
+        print(f'Phase Difference Between Current and Voltage: {c_zero_crossing - v_zero_crossing}')
 
     print(f'Voltage RMS: {rms(voltage)}')
     print(f'Current RMS: {rms(current)}')
