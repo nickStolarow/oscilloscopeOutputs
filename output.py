@@ -6,6 +6,12 @@ parses all of the columns into their own array and performs several calculations
 before printing the results of those calculations to the terminal.
 """
 
+# TODO: Allow user to specify what columns they want to operate on.
+# TODO: Allow user to select what operations to perform on the specified columns.
+# TODO: Operations consist of Peak-to-Peak, RMS, and Phase Difference.
+# TODO: Phase difference is always between 2 columns
+# TODO: (Time is always left most column)
+
 __author__ = "Nick Stolarow"
 __copyright__ = "Copyright 2020, Nick Stolarow"
 __credits__ = "Dr. Nirmala Kandadai"
