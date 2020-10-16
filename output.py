@@ -10,7 +10,7 @@ __author__ = "Nick Stolarow"
 __copyright__ = "Copyright 2020, Nick Stolarow"
 __credits__ = "Dr. Nirmala Kandadai"
 __license__ = "GPL"
-__version__ = "2.0"
+__version__ = "2.1"
 __maintainer__ = "Nick Stolarow"
 __email__ = "nickstolarow@gmail.com"
 __status__ = "Production"
@@ -21,6 +21,13 @@ __status__ = "Production"
 import argparse
 import math
 import sys
+
+
+################################################################################
+# Globals
+################################################################################
+NUM_OPERATIONS = 3
+BAR_LENGTH = 100
 
 
 ################################################################################
@@ -60,63 +67,61 @@ def peak_to_peak(values: list) -> float:
     return max(values) - min(values)
 
 
-def voltage_zero_crossing(time: list, voltage: list) -> tuple:
+def phase_difference(list_of_columns: list, cols_to_operate: list) -> float:
     positive_first = None
-    avg = 0.0
+    avg_a = 0.0
+    avg_b = 0.0
     sign_change_index = -1
+    time = list_of_columns[0]
+    col_a = list_of_columns[cols_to_operate[0]]
+    col_b = list_of_columns[cols_to_operate[1]]
 
-    if voltage[0] > 0:
+    if col_a[0] > 0:
         positive_first = True
     else:
         positive_first = False
 
-    for v in voltage:
+    for a in col_a:
         if positive_first:
-            if v < 0:
-                sign_change_index = voltage.index(v)
+            if a < 0:
+                sign_change_index = col_a.index(a)
                 t1 = sign_change_index - 1
                 t2 = sign_change_index
-                avg = (time[t1] + time[t2]) / 2
+                avg_a = (time[t1] + time[t2]) / 2
                 break
         else:
-            if v > 0:
-                sign_change_index = voltage.index(v)
+            if a > 0:
+                sign_change_index = col_a.index(a)
                 t1 = sign_change_index - 1
                 t2 = sign_change_index
-                avg = (time[t1] + time[t2]) / 2
+                avg_a = (time[t1] + time[t2]) / 2
                 break
 
-    return avg, sign_change_index
-
-
-def current_zero_crossing(time: list, current: list, start_index: int) -> float:
     positive_first = None
-    avg = 0.0
-    sign_change_index = -1
+    start_index = sign_change_index
 
-    if current[start_index] > 0:
+    if col_b[start_index] > 0:
         positive_first = True
     else:
         positive_first = False
 
-    for c in current[start_index:]:
-
+    for b in col_b[start_index:]:
         if positive_first:
-            if c < 0:
-                sign_change_index = current.index(c)
+            if b < 0:
+                sign_change_index = col_b.index(b)
                 t1 = sign_change_index - 1
                 t2 = sign_change_index
-                avg = (time[t1] + time[t2]) / 2
+                avg_b = (time[t1] + time[t2]) / 2
                 break
         else:
-            if c > 0:
-                sign_change_index = current.index(c)
+            if b > 0:
+                sign_change_index = col_b.index(b)
                 t1 = sign_change_index - 1
                 t2 = sign_change_index
-                avg = (time[t1] + time[t2]) / 2
+                avg_b = (time[t1] + time[t2]) / 2
                 break
 
-    return avg
+    return math.fabs(avg_a - avg_b)
 
 
 def rms(values: list) -> float:
@@ -134,19 +139,15 @@ def menu(list_of_columns: list):
     print('Press q To Exit.')
 
     while True:
-        cols = input('Specify Columns To Operate On (Separate Column Numbers By Commas (0 Is Left Most Column))?: ').lower()
+        cols = input(
+            'Specify Columns To Operate On (Separate Column Numbers By Commas (0 Is Left Most Column))?: ').lower()
 
         if cols == 'q':
             print('Goodbye!')
             sys.exit(0)
-        else:
-            cols_to_operate = cols.split(',')
 
-        if '' in cols_to_operate:
-            cols_to_operate.remove('')
-
-        if ' ' in cols_to_operate:
-            cols_to_operate.remove(' ')
+        cols_to_operate = cols.split(',')
+        clean_list(cols_to_operate)
 
         try:
             cols_to_operate = [int(i) for i in cols_to_operate]
@@ -164,56 +165,55 @@ def menu(list_of_columns: list):
         if operation == 'q':
             print('Goodbye!')
             sys.exit(0)
-        else:
-            print('-'*100)
-            operations_to_perform = operation.split(',')
 
-            if '' in operations_to_perform:
-                operations_to_perform.remove('')
+        print_bar()
+        operations_to_perform = operation.split(',')
+        clean_list(operations_to_perform)
 
-            if ' ' in operations_to_perform:
-                operations_to_perform.remove(' ')
+        try:
+            operations_to_perform = [int(i) for i in operations_to_perform]
+        except ValueError:
+            print('Error: Input May Only Be Integers And Commas.')
+            print_bar()
+            continue
 
-            try:
-                operations_to_perform = [int(i) for i in operations_to_perform]
-            except ValueError:
-                print('Error: Input May Only Be Integers And Commas.')
-                print('-'*100)
-                continue
+        brk = False
+        for i in operations_to_perform:
+            if i > NUM_OPERATIONS or i < 1:
+                print(f'Error: {i} Is An Unknown Operation')
+                brk = True
 
-            brk = False
-            for i in operations_to_perform:
-                if i > 3 or i < 1:
-                    print(f'Error: {i} Is An Unknown Operation')
-                    brk = True
+        if brk:
+            print_bar()
+            continue
 
-            if brk:
-                print('-'*100)
-                continue
+        for op in operations_to_perform:
+            for col in cols_to_operate:
+                if op == 1:
+                    print(f'RMS Of Column {col}: {rms(list_of_columns[col])}')
+                elif op == 2:
+                    print(f'Peak-to-Peak Of Column {col}: {peak_to_peak(list_of_columns[col])}')
 
-            for op in operations_to_perform:
-                for col in cols_to_operate:
-                    if col == '':
-                        continue
+            if op == 3:
+                if len(cols_to_operate) == 2:
+                    print(f'Phase Difference Of Column {cols_to_operate[0]} And {cols_to_operate[1]}: '
+                          f'{phase_difference(list_of_columns, cols_to_operate)}')
+                else:
+                    print('Error: Could Not Calculate Phase Difference As It Requires Exactly Two Columns Of Data.')
 
-                    if op == 1:
-                        print(f'RMS Of Column {col}: {rms(list_of_columns[col])}')
-                    elif op == 2:
-                        print(f'Peak-to-Peak Of Column {col}: {peak_to_peak(list_of_columns[col])}')
+        print_bar()
 
-                if op == 3:
-                    if len(cols_to_operate) == 2:
-                        col1, start_index = voltage_zero_crossing(list_of_columns[0], list_of_columns[1])
-                        col2 = current_zero_crossing(list_of_columns[0], list_of_columns[2], start_index)
 
-                        if col1 >= col2:
-                            print(f'Phase Difference Of Column {cols_to_operate[0]} And {cols_to_operate[1]}: {col1 - col2}')
-                        else:
-                            print(f'Phase Difference Of Column {cols_to_operate[1]} And {cols_to_operate[0]}: {col2 - col1}')
-                    else:
-                        print('Error: Could Not Calculate Phase Difference As It Requires Exactly Two Columns Of Data.')
+def clean_list(values: list):
+    if '' in values:
+        values.remove('')
 
-        print('-'*100)
+    if ' ' in values:
+        values.remove(' ')
+
+
+def print_bar():
+    print('-' * BAR_LENGTH)
 
 
 ################################################################################
