@@ -6,17 +6,11 @@ parses all of the columns into their own array and performs several calculations
 before printing the results of those calculations to the terminal.
 """
 
-# TODO: Allow user to specify what columns they want to operate on.
-# TODO: Allow user to select what operations to perform on the specified columns.
-# TODO: Operations consist of Peak-to-Peak, RMS, and Phase Difference.
-# TODO: Phase difference is always between 2 columns
-# TODO: (Time is always left most column)
-
 __author__ = "Nick Stolarow"
 __copyright__ = "Copyright 2020, Nick Stolarow"
 __credits__ = "Dr. Nirmala Kandadai"
 __license__ = "GPL"
-__version__ = "1.0"
+__version__ = "2.0"
 __maintainer__ = "Nick Stolarow"
 __email__ = "nickstolarow@gmail.com"
 __status__ = "Production"
@@ -171,7 +165,7 @@ def menu(list_of_columns: list):
             print('Goodbye!')
             sys.exit(0)
         else:
-            print('-'*91)
+            print('-'*100)
             operations_to_perform = operation.split(',')
 
             if '' in operations_to_perform:
@@ -184,13 +178,18 @@ def menu(list_of_columns: list):
                 operations_to_perform = [int(i) for i in operations_to_perform]
             except ValueError:
                 print('Error: Input May Only Be Integers And Commas.')
-                print('-'*91)
+                print('-'*100)
                 continue
 
+            brk = False
             for i in operations_to_perform:
-                if i > 3 or i < 0:
+                if i > 3 or i < 1:
                     print(f'Error: {i} Is An Unknown Operation')
-                    break
+                    brk = True
+
+            if brk:
+                print('-'*100)
+                continue
 
             for op in operations_to_perform:
                 for col in cols_to_operate:
@@ -216,7 +215,7 @@ def menu(list_of_columns: list):
                     else:
                         print('Error: Could Not Calculate Phase Difference As It Requires Exactly Two Columns Of Data.')
 
-        print('-'*91)
+        print('-'*100)
 
 
 ################################################################################
