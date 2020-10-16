@@ -200,8 +200,6 @@ def menu(list_of_columns: list):
                         print(f'RMS Of Column {col}: {rms(list_of_columns[col])}')
                     elif op == 2:
                         print(f'Peak-to-Peak Of Column {col}: {peak_to_peak(list_of_columns[col])}')
-                    elif op == 3:
-                        pass
 
                 if op == 3:
                     if len(cols_to_operate) == 2:
