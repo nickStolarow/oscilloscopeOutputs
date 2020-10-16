@@ -26,6 +26,7 @@ __status__ = "Production"
 ################################################################################
 import argparse
 import math
+import sys
 
 
 ################################################################################
@@ -38,10 +39,9 @@ def argument_parser():
     return parser.parse_args()
 
 
-def parse_file(filepath: str) -> tuple:
-    time = []
-    voltage = []
-    current = []
+def parse_file(filepath: str) -> list:
+    main_list = []
+    first_loop = True
 
     with open(filepath, 'r') as f:
         line = f.readline()
@@ -50,12 +50,16 @@ def parse_file(filepath: str) -> tuple:
             line = f.readline()
             values = line.split()
 
-            if len(values) != 0:
-                current.append(float(values.pop()))
-                voltage.append(float(values.pop()))
-                time.append(float(values.pop()))
+            if first_loop is True:
+                first_loop = False
+                for i in range(0, len(values)):
+                    main_list.append(list())
 
-    return time, voltage, current
+            for a in reversed(main_list):
+                if len(values) != 0:
+                    a.append(float(values.pop()))
+
+    return main_list
 
 
 def peak_to_peak(values: list) -> float:
@@ -73,7 +77,6 @@ def voltage_zero_crossing(time: list, voltage: list) -> tuple:
         positive_first = False
 
     for v in voltage:
-
         if positive_first:
             if v < 0:
                 sign_change_index = voltage.index(v)
@@ -133,24 +136,94 @@ def rms(values: list) -> float:
     return math.sqrt(mean)
 
 
+def menu(list_of_columns: list):
+    print('Press q To Exit.')
+
+    while True:
+        cols = input('Specify Columns To Operate On (Separate Column Numbers By Commas (0 Is Left Most Column))?: ').lower()
+
+        if cols == 'q':
+            print('Goodbye!')
+            sys.exit(0)
+        else:
+            cols_to_operate = cols.split(',')
+
+        if '' in cols_to_operate:
+            cols_to_operate.remove('')
+
+        if ' ' in cols_to_operate:
+            cols_to_operate.remove(' ')
+
+        try:
+            cols_to_operate = [int(i) for i in cols_to_operate]
+        except ValueError:
+            print('Error: Input May Only Be Integers Separated By Commas.')
+            continue
+
+        if max(cols_to_operate) > len(list_of_columns) - 1 or min(cols_to_operate) < 0:
+            print('Error: Column Specified Is Out Of Range.')
+            continue
+
+        print('Available Operations To Perform:\n1. RMS\n2. Peak-to-Peak\n3. Phase Difference')
+        operation = input('Specify Operations To Perform (Separate Operation Numbers By Commas)?: ').lower()
+
+        if operation == 'q':
+            print('Goodbye!')
+            sys.exit(0)
+        else:
+            print('-'*91)
+            operations_to_perform = operation.split(',')
+
+            if '' in operations_to_perform:
+                operations_to_perform.remove('')
+
+            if ' ' in operations_to_perform:
+                operations_to_perform.remove(' ')
+
+            try:
+                operations_to_perform = [int(i) for i in operations_to_perform]
+            except ValueError:
+                print('Error: Input May Only Be Integers And Commas.')
+                print('-'*91)
+                continue
+
+            for i in operations_to_perform:
+                if i > 3 or i < 0:
+                    print(f'Error: {i} Is An Unknown Operation')
+                    break
+
+            for op in operations_to_perform:
+                for col in cols_to_operate:
+                    if col == '':
+                        continue
+
+                    if op == 1:
+                        print(f'RMS Of Column {col}: {rms(list_of_columns[col])}')
+                    elif op == 2:
+                        print(f'Peak-to-Peak Of Column {col}: {peak_to_peak(list_of_columns[col])}')
+                    elif op == 3:
+                        pass
+
+                if op == 3:
+                    if len(cols_to_operate) == 2:
+                        col1, start_index = voltage_zero_crossing(list_of_columns[0], list_of_columns[1])
+                        col2 = current_zero_crossing(list_of_columns[0], list_of_columns[2], start_index)
+
+                        if col1 >= col2:
+                            print(f'Phase Difference Of Column {cols_to_operate[0]} And {cols_to_operate[1]}: {col1 - col2}')
+                        else:
+                            print(f'Phase Difference Of Column {cols_to_operate[1]} And {cols_to_operate[0]}: {col2 - col1}')
+                    else:
+                        print('Error: Could Not Calculate Phase Difference As It Requires Exactly Two Columns Of Data.')
+
+        print('-'*91)
+
+
 ################################################################################
 # Run
 ################################################################################
 if __name__ == '__main__':
     args = argument_parser()
     filepath = args.Filepath
-    time, voltage, current = parse_file(filepath)
-    print(f'Voltage Peak to Peak: {peak_to_peak(voltage)}V')
-    print(f'Current Peak to Peak: {peak_to_peak(current)}I')
-    v_zero_crossing, start_index = voltage_zero_crossing(time, voltage)
-    c_zero_crossing = current_zero_crossing(time, current, start_index)
-    print(f'When Voltage Crosses Zero: {v_zero_crossing}')
-    print(f'When Current Crosses Zero: {c_zero_crossing}')
-
-    if v_zero_crossing > c_zero_crossing:
-        print(f'Phase Difference Between Voltage and Current: {v_zero_crossing - c_zero_crossing}')
-    else:
-        print(f'Phase Difference Between Current and Voltage: {c_zero_crossing - v_zero_crossing}')
-
-    print(f'Voltage RMS: {rms(voltage)}')
-    print(f'Current RMS: {rms(current)}')
+    list_of_columns = parse_file(filepath)
+    menu(list_of_columns)
