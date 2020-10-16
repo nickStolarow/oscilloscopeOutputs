@@ -171,21 +171,20 @@ def menu(list_of_columns: list):
         clean_list(operations_to_perform)
 
         try:
-            operations_to_perform = [int(i) for i in operations_to_perform]
+            operations_to_perform = [int(j) for j in operations_to_perform]
         except ValueError:
             print('Error: Input May Only Be Integers And Commas.')
             print_bar()
             continue
 
-        brk = False
-        for i in operations_to_perform:
-            if i > NUM_OPERATIONS or i < 1:
-                print(f'Error: {i} Is An Unknown Operation')
-                brk = True
+        to_remove = []
+        for k in operations_to_perform:
+            if k > NUM_OPERATIONS or k < 1:
+                print(f'Error: {k} Is An Unknown Operation')
+                to_remove.append(k)
 
-        if brk:
-            print_bar()
-            continue
+        for l in to_remove:
+            operations_to_perform.remove(l)
 
         for op in operations_to_perform:
             for col in cols_to_operate:
