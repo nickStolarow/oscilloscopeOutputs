@@ -26,7 +26,7 @@ import sys
 ################################################################################
 # Globals
 ################################################################################
-NUM_OPERATIONS = 3
+NUM_OPERATIONS = 5
 BAR_LENGTH = 100
 
 
@@ -137,8 +137,9 @@ def rms(values: list) -> float:
 
 def menu(list_of_columns: list):
     print('Press q To Exit.')
-
     while True:
+        print('**NOTE: Operation 5 Expects The Specified Columns To Be In The Form:'
+              '\n<Column That Contains Search Value>, <Column To Search For Search Value>')
         cols = input(
             'Specify Columns To Operate On (Separate Column Numbers By Commas (0 Is Left Most Column))?: ').lower()
 
@@ -159,7 +160,8 @@ def menu(list_of_columns: list):
             print('Error: Column Specified Is Out Of Range.')
             continue
 
-        print('Available Operations To Perform:\n1. RMS\n2. Peak-to-Peak\n3. Phase Difference')
+        print('Available Operations To Perform:\n1. RMS\n2. Peak-to-Peak\n3. Phase Difference\n4. Rise Time'
+              '\n5. Get Corresponding Values')
         operation = input('Specify Operations To Perform (Separate Operation Numbers By Commas)?: ').lower()
 
         if operation == 'q':
@@ -192,6 +194,11 @@ def menu(list_of_columns: list):
                     print(f'RMS Of Column {col}: {rms(list_of_columns[col])}')
                 elif op == 2:
                     print(f'Peak-to-Peak Of Column {col}: {peak_to_peak(list_of_columns[col])}')
+                elif op == 4:
+                    peak, time, rt = rise_time(list_of_columns, col)
+                    if rt == -1:
+                        rt = 'Error: Voltage Does Not Reach 1'
+                    print(f'Peak Value {peak} Occurs At Time {time} | Rise Time: {rt}')
 
             if op == 3:
                 if len(cols_to_operate) == 2:
@@ -199,6 +206,17 @@ def menu(list_of_columns: list):
                           f'{phase_difference(list_of_columns, cols_to_operate)}')
                 else:
                     print('Error: Could Not Calculate Phase Difference As It Requires Exactly Two Columns Of Data.')
+
+            if op == 5:
+                if len(cols_to_operate) == 2:
+                    search_val = input('Search Value: ')
+                    search_val = float(search_val)
+                    ret_val = corresponding_values(list_of_columns, cols_to_operate[0], cols_to_operate[1], search_val)
+                    if ret_val == -1:
+                        ret_val = f'Error: Could Not Find {search_val} In Column {cols_to_operate[1]}'
+                    print(f'Corresponding Value: {ret_val}')
+                else:
+                    print('Error: Could Not Calculate Corresponding Values As It Requires Exactly Two Columns Of Data.')
 
         print_bar()
 
@@ -215,6 +233,28 @@ def print_bar():
     print('-' * BAR_LENGTH)
 
 
+def corresponding_values(list_of_columns: list, base_column: int, search_column: int, search_value: str) -> float:
+    try:
+        index = list_of_columns[base_column].index(search_value)
+    except ValueError:
+        return -1
+
+    return list_of_columns[search_column][index]
+
+
+def rise_time(list_of_columns: list, column: int) -> tuple:
+    peak = max(list_of_columns[column])
+    peak_index = list_of_columns[column].index(peak)
+    time = list_of_columns[0][peak_index]
+
+    try:
+        rt = list_of_columns[column].index(1)
+        rt_time = list_of_columns[0][rt]
+    except ValueError:
+        return peak, time, -1
+
+    return peak, time, rt_time
+
 ################################################################################
 # Run
 ################################################################################
@@ -223,3 +263,5 @@ if __name__ == '__main__':
     filepath = args.Filepath
     list_of_columns = parse_file(filepath)
     menu(list_of_columns)
+    # ret_val = corresponding_values(list_of_columns, 1, 0, 1.532409e+002)
+    # print(ret_val)
