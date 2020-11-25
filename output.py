@@ -21,6 +21,8 @@ __status__ = "Production"
 import argparse
 import math
 import sys
+import numpy as np
+import scipy.integrate as integrate
 
 
 ################################################################################
@@ -255,6 +257,12 @@ def rise_time(list_of_columns: list, column: int) -> tuple:
 
     return peak, time, rt_time
 
+def find_period(a: float, b: float) -> float:
+    pass
+
+def f(x):
+    return x
+
 ################################################################################
 # Run
 ################################################################################
@@ -262,6 +270,5 @@ if __name__ == '__main__':
     args = argument_parser()
     filepath = args.Filepath
     list_of_columns = parse_file(filepath)
-    menu(list_of_columns)
-    # ret_val = corresponding_values(list_of_columns, 1, 0, 1.532409e+002)
-    # print(ret_val)
+    # menu(list_of_columns)
+    print(integrate.quad(f, 0, 9))
